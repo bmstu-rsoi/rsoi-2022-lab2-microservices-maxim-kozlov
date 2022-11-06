@@ -1,4 +1,6 @@
 using System.Reflection;
+using FlightBooking.FlightService.Database;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.OpenApi.Models;
 
 namespace FlightBooking.FlightService;
@@ -18,7 +20,7 @@ public class Startup
         // services.AddHealthChecks();
         services.AddControllers();
         
-        // services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
+        services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
         services.AddEndpointsApiExplorer();
         services.AddSwaggerGen(c =>
         {
@@ -29,9 +31,8 @@ public class Startup
             if (File.Exists(xmlPath))
                 c.IncludeXmlComments(xmlPath);
         });
-
-        // services.AddScoped<IPersonsRepository, PersonsRepository>();
-        // services.AddDbContext<PersonsContext>(opt => opt.UseNpgsql(Configuration.GetConnectionString("DefaultConnection")));
+        
+        services.AddDbContext<FlightsContext>(opt => opt.UseNpgsql(Configuration.GetValue<string>("DATABASE_URL")));
     }
 
     // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

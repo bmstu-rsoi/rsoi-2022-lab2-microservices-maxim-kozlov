@@ -1,3 +1,5 @@
+using FlightBooking.FlightService.Database;
+using FlightBooking.FlightService.Database.Entities;
 using FlightBooking.FlightService.Extensions;
 using Serilog;
 
