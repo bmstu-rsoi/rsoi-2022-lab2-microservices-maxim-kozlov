@@ -30,6 +30,10 @@ jobs:
         env:
           - WAIT_PORTS=8080,8070,8060,8050,5432
 
+      - name: Fill database for tests
+        run: |
+          ./scripts/fill-db.sh
+      
       - name: Run API Tests
         uses: matt-ball/newman-action@master
         with:
