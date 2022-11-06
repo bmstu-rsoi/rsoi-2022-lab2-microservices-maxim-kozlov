@@ -1,0 +1,29 @@
+version: '3.7'
+services:
+  elasticsearch:
+    image: elasticsearch:7.17.0
+    container_name: elasticsearch
+    hostname: elasticsearch
+    ports:
+      - "9200:9200"
+      - "9300:9300"
+    environment:
+      ES_JAVA_OPTS: "-Xmx2048m -Xms2048m"
+      discovery.type: single-node
+    networks:
+      - flightBookingNetwork
+
+  kibana:
+    image: kibana:7.17.0
+    container_name: kibana
+    hostname: kibana
+    ports:
+      - "5601:5601"
+    depends_on:
+      - elasticsearch
+    networks:
+      - flightBookingNetwork
+
+networks:
+  flightBookingNetwork:
+    external: true
