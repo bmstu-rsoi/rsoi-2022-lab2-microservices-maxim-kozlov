@@ -20,7 +20,9 @@ jobs:
       # TODO run unit tests
       - name: Build images
         timeout-minutes: 10
-        run: docker compose build
+        run: |
+          ./scripts/publish.sh
+          docker compose build
 
       - name: Run containers
         timeout-minutes: 5
