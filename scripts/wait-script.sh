@@ -2,10 +2,6 @@
 
 IFS="," read -ra PORTS <<<"$WAIT_PORTS"
 
-echo "pwd: $(pwd)\n"
-echo "$path"
-ls
-
 PIDs=()
 for port in "${PORTS[@]}"; do
   "$(pwd)"/scripts/wait-for.sh -t 120 "localhost:$port" -- echo "Host localhost:$port is active" &
