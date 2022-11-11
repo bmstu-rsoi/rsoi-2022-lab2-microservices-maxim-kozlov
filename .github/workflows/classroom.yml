@@ -30,6 +30,7 @@ jobs:
           ./scripts/start.sh
           ./scripts/wait-script.sh
         env:
+          path: ./scripts
           WAIT_PORTS: 8080,8070,8060,8050,5432
 
       - name: Fill database for tests
