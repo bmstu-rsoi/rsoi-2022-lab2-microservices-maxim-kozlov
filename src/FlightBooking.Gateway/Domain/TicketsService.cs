@@ -31,7 +31,7 @@ public class TicketsService : ITicketsService
     
     public async Task<TicketResponse> GetAsync(string username, Guid ticketUid)
     {
-        var ticket = await _ticketsRepository.GetAsync(ticketUid);
+        var ticket = await _ticketsRepository.GetAsync(username, ticketUid);
         var response = _mapper.Map<TicketResponse>(ticket);
 
         await AddFlightInfoAsync(ticket.FlightNumber, response);
@@ -56,7 +56,7 @@ public class TicketsService : ITicketsService
         return response;
     }
 
-    public async Task<TicketPurchaseResponse> Purchase(string username, TicketPurchaseRequest request)
+    public async Task<TicketPurchaseResponse> PurchaseAsync(string username, TicketPurchaseRequest request)
     {
         // по-хорошему транзация
         var response = new TicketPurchaseResponse();
@@ -106,6 +106,12 @@ public class TicketsService : ITicketsService
         return response;
     }
 
+    public async Task DeleteAsync(string username, Guid ticketId)
+    {
+        await _ticketsRepository.DeleteAsync(username, ticketId);
+        await _privilegeRepository.DeleteAsync(username, ticketId);
+    }
+    
     private async Task<T> AddFlightInfoAsync<T>(string flightNumber, T ticket)
     {
         try

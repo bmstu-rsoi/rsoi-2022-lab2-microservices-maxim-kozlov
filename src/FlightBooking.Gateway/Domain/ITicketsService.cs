@@ -11,5 +11,7 @@ public interface ITicketsService
     
     Task<List<TicketResponse>> GetAllAsync(string username);
 
-    Task<TicketPurchaseResponse> Purchase(string username, TicketPurchaseRequest request);
+    Task<TicketPurchaseResponse> PurchaseAsync(string username, TicketPurchaseRequest request);
+    
+    Task DeleteAsync(string username, Guid ticketId);
 }

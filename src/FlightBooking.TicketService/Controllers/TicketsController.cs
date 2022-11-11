@@ -79,23 +79,24 @@ public class TicketsController : ControllerBase
             throw;
         }
     }
-    
+
     /// <summary>
     /// Информация по конкретному билету
     /// </summary>
+    /// <param name="username"></param>
     /// <param name="ticketId">UUID билета </param>
     /// <returns></returns>
-    [HttpGet("{ticketUid:guid}")]
+    [HttpGet("{ticketId:guid}")]
     [SwaggerResponse(statusCode: StatusCodes.Status200OK, type: typeof(TicketDto), description: "Билет пользователя.")]
     [SwaggerResponse(statusCode: StatusCodes.Status404NotFound, description: "Билет не найден.")]
     [SwaggerResponse(statusCode: StatusCodes.Status500InternalServerError, description: "Ошибка на стороне сервера.")]
-    public async Task<IActionResult> Get(Guid ticketId)
+    public async Task<IActionResult> Get([Required, FromQuery(Name = "username")] string username, Guid ticketId)
     {
         try
         {
             var ticket = await _context.Tickets
                 .AsNoTracking()
-                .FirstOrDefaultAsync(x => x.TicketUid == ticketId);
+                .FirstOrDefaultAsync(x => x.TicketUid == ticketId && x.Username == username);
             
             if (ticket == null)
                 return NotFound(ticketId);
@@ -120,7 +121,7 @@ public class TicketsController : ControllerBase
     [SwaggerResponse(statusCode: StatusCodes.Status403Forbidden, description: "Пользователь не найден.")]
     [SwaggerResponse(statusCode: StatusCodes.Status404NotFound, description: "Билет не найден.")]
     [SwaggerResponse(statusCode: StatusCodes.Status500InternalServerError, description: "Ошибка на стороне сервера.")]
-    public async Task<IActionResult> Delete([Required, FromHeader(Name = "X-User-Name")] string username, Guid ticketId)
+    public async Task<IActionResult> Delete([Required, FromQuery(Name = "username")] string username, Guid ticketId)
     {
         try
         {

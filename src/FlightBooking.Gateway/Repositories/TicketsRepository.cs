@@ -40,9 +40,12 @@ public class TicketsRepository : ITicketsRepository
         return await response.Content.ReadAsJsonAsync<TicketDto[]>() ?? throw new InvalidOperationException();
     }
 
-    public async Task<TicketDto> GetAsync(Guid ticketId)
+    public async Task<TicketDto> GetAsync(string username, Guid ticketId)
     {
-        var response = await _client.GetAsync($"/api/v1/tickets/{ticketId}");
+        var query = HttpUtility.ParseQueryString(string.Empty);
+        query["username"] = username;
+        
+        var response = await _client.GetAsync($"/api/v1/tickets/{ticketId}/?{query}");
         if (!response.IsSuccessStatusCode)
             _logger.LogWarning("Failed get ticket {statusCode}, {descriprion}", response.StatusCode, response.Content.ReadAsStringAsync());
         response.EnsureSuccessStatusCode();
@@ -62,10 +65,12 @@ public class TicketsRepository : ITicketsRepository
     
     public async Task DeleteAsync(string username, Guid ticketId)
     {
-        var response = await _client.DeleteAsync($"/api/v1/tickets/{ticketId}");
+        var query = HttpUtility.ParseQueryString(string.Empty);
+        query["username"] = username;
+        
+        var response = await _client.DeleteAsync($"/api/v1/tickets/{ticketId}/?{query}");
         if (!response.IsSuccessStatusCode)
             _logger.LogWarning("Failed delete ticket {statusCode}, {descriprion}", response.StatusCode, response.Content.ReadAsStringAsync());
         response.EnsureSuccessStatusCode();
     }
-    
 }

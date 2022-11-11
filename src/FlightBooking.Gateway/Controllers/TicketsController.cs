@@ -103,7 +103,7 @@ public class TicketsController: ControllerBase
             if (!ModelState.IsValid)
                 return BadRequest(ModelState);
 
-            var response = await _ticketsService.Purchase(username, request);
+            var response = await _ticketsService.PurchaseAsync(username, request);
             return Ok(response);
         }
         catch (HttpRequestException ex) when (ex.StatusCode == HttpStatusCode.NotFound)
@@ -132,7 +132,8 @@ public class TicketsController: ControllerBase
     {
         try
         {
-            throw new NotImplementedException();
+            await _ticketsService.DeleteAsync(username, ticketUid);
+            return NoContent();
         }
         catch (Exception ex)
         {

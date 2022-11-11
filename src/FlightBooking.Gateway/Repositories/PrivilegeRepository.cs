@@ -53,4 +53,15 @@ public class PrivilegeRepository : IPrivilegeRepository
         
         return await response.Content.ReadAsJsonAsync<BalanceHistoryDto>() ?? throw new InvalidOperationException();
     }
+    
+    public async Task DeleteAsync(string username, Guid ticketId)
+    {
+        var query = HttpUtility.ParseQueryString(string.Empty);
+        query["username"] = username;
+        
+        var response = await _client.DeleteAsync($"/api/v1/history/{ticketId}/?{query}");
+        if (!response.IsSuccessStatusCode)
+            _logger.LogWarning("Failed delete ticket {statusCode}, {descriprion}", response.StatusCode, response.Content.ReadAsStringAsync());
+        response.EnsureSuccessStatusCode();
+    }
 }

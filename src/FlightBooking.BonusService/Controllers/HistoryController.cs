@@ -128,8 +128,10 @@ public class HistoryController : ControllerBase
             
             if (lastOperation == null)
                 return NotFound(ticketUid);
+
+            var newOperation = new PrivilegeHistory();
+            _mapper.Map(lastOperation, newOperation);
             
-            var newOperation = _mapper.Map<PrivilegeHistory>(lastOperation);
             var balanceDiff = -lastOperation.BalanceDiff;
             if (balanceDiff > 0)
                 newOperation.OperationType = OperationTypeDto.FillInBalance.GetValue();

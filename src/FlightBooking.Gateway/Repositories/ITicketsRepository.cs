@@ -9,7 +9,7 @@ public interface ITicketsRepository
 {
     Task<TicketDto[]> GetAllAsync(string username);
     
-    Task<TicketDto> GetAsync(Guid ticketId);
+    Task<TicketDto> GetAsync(string username, Guid ticketId);
     
     Task<TicketDto> CreateAsync(TicketDto ticketDto);
     
