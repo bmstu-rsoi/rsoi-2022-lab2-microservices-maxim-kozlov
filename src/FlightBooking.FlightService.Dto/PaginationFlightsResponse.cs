@@ -1,4 +1,5 @@
 using System.Text.Json.Serialization;
+using Newtonsoft.Json;
 
 namespace FlightBooking.FlightService.Dto;
 
@@ -7,24 +8,24 @@ public class PaginationFlightsResponse
     /// <summary>
     /// Номер страницы
     /// </summary>
-    [JsonPropertyName("page")]
+    [JsonProperty("page")]
     public int Page { get; set; }
     
     /// <summary>
     /// Количество элементов на странице
     /// </summary>
-    [JsonPropertyName("pageSize")]
+    [JsonProperty("pageSize")]
     public int PageSize { get; set; }
     
     /// <summary>
     /// Общее количество элементов
     /// </summary>
-    [JsonPropertyName("totalElements")]
+    [JsonProperty("totalElements")]
     public int TotalElements { get; set; }
     
     /// <summary>
     /// Массив рейсов
     /// </summary>
-    [JsonPropertyName("items")]
+    [JsonProperty("items")]
     public FlightResponse[] Flights { get; set; }
 }

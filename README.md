@@ -64,3 +64,7 @@
 1. [Hotels Booking System](v2/README.md)
 1. [Car Rental System](v3/README.md)
 1. [Library System](v4/README.md)
+
+
+
+ dotnet ef dbcontext scaffold --project FlightBooking.BonusService/FlightBooking.BonusService.csproj --startup-project FlightBooking.BonusService/FlightBooking.BonusService.csproj --configuration Debug "Host=localhost;User ID=program;Password=test;Port=5432;Database=privileges;" Npgsql.EntityFrameworkCore.PostgreSQL --data-annotations --context BonusContext --context-dir Database --output-dir Database/Entities

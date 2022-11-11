@@ -1,5 +1,9 @@
 using System.Reflection;
+using FlightBooking.BonusService.Database;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.OpenApi.Models;
+using Newtonsoft.Json;
+using Newtonsoft.Json.Converters;
 
 namespace FlightBooking.BonusService;
 
@@ -15,10 +19,15 @@ public class Startup
     // This method gets called by the runtime. Use this method to add services to the container.
     public void ConfigureServices(IServiceCollection services)
     {
-        // services.AddHealthChecks();
-        services.AddControllers();
+        services.AddHealthChecks();
+        services.AddControllers()
+            .AddNewtonsoftJson(options =>
+            {
+                options.SerializerSettings.NullValueHandling = NullValueHandling.Ignore;
+                options.SerializerSettings.Converters.Add(new StringEnumConverter());
+            });
         
-        // services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
+        services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
         services.AddEndpointsApiExplorer();
         services.AddSwaggerGen(c =>
         {
@@ -30,8 +39,7 @@ public class Startup
                 c.IncludeXmlComments(xmlPath);
         });
 
-        // services.AddScoped<IPersonsRepository, PersonsRepository>();
-        // services.AddDbContext<PersonsContext>(opt => opt.UseNpgsql(Configuration.GetConnectionString("DefaultConnection")));
+        services.AddDbContext<BonusContext>(opt => opt.UseNpgsql(Configuration.GetValue<string>("DATABASE_URL")));
     }
 
     // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -50,6 +58,7 @@ public class Startup
         app.UseEndpoints(endpoints =>
         {
             endpoints.MapControllers();
+            endpoints.MapHealthChecks("/manage/health");
         });
     }
 }

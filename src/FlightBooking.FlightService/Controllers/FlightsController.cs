@@ -33,7 +33,7 @@ public class FlightsController : ControllerBase
     [HttpGet]
     [SwaggerResponse(statusCode: StatusCodes.Status200OK, type: typeof(PaginationFlightsResponse), description: "Список рейсов")]
     [SwaggerResponse(statusCode: StatusCodes.Status500InternalServerError, description: "Ошибка на стороне сервера.")]
-    public async Task<IActionResult> GetAll([Range(0, int.MaxValue)] int page, [Range(1, 100)] int size)
+    public async Task<IActionResult> GetAll([Range(1, int.MaxValue)] int page, [Range(1, 100)] int size)
     {
         try
         {
@@ -42,7 +42,7 @@ public class FlightsController : ControllerBase
             var flights = await _context.Flights
                 .AsNoTracking()
                 .OrderByDescending(x => x.Datetime)
-                .Skip(page * size)
+                .Skip((page - 1) * size)
                 .Take(size)
                 .Include(x => x.FromAirport)
                 .Include(x => x.ToAirport)

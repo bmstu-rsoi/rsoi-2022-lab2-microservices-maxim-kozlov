@@ -1,5 +1,15 @@
+using System;
+using System.IO;
 using System.Reflection;
+using FlightBooking.Gateway.Domain;
+using FlightBooking.Gateway.Repositories;
+using Microsoft.AspNetCore.Builder;
+using Microsoft.AspNetCore.Hosting;
+using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
 using Microsoft.OpenApi.Models;
+using Newtonsoft.Json.Converters;
 
 namespace FlightBooking.Gateway;
 
@@ -16,9 +26,13 @@ public class Startup
     public void ConfigureServices(IServiceCollection services)
     {
         // services.AddHealthChecks();
-        services.AddControllers();
-        
-        // services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
+        services.AddControllers()
+            .AddNewtonsoftJson(options =>
+            {
+                options.SerializerSettings.Converters.Add(new StringEnumConverter());
+            });
+
+        services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
         services.AddEndpointsApiExplorer();
         services.AddSwaggerGen(c =>
         {
@@ -30,8 +44,16 @@ public class Startup
                 c.IncludeXmlComments(xmlPath);
         });
 
-        // services.AddScoped<IPersonsRepository, PersonsRepository>();
-        // services.AddDbContext<PersonsContext>(opt => opt.UseNpgsql(Configuration.GetConnectionString("DefaultConnection")));
+        services.Configure<FlightsSettings>(Configuration.GetSection("FlightsService"));
+        services.AddScoped<IFlightsRepository, FlightsRepository>();
+        
+        services.Configure<TicketsSettings>(Configuration.GetSection("TicketService"));
+        services.AddScoped<ITicketsRepository, TicketsRepository>();
+        
+        services.Configure<PrivilegeSettings>(Configuration.GetSection("PrivilegeService"));
+        services.AddScoped<IPrivilegeRepository, PrivilegeRepository>();
+        
+        services.AddScoped<ITicketsService, TicketsService>();
     }
 
     // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

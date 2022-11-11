@@ -127,8 +127,8 @@ ALTER TABLE ONLY public.flight ALTER COLUMN id SET DEFAULT nextval('public.fligh
 --
 
 COPY public.airport (id, name, city, country) FROM stdin;
-1	Шереметьево	Москва	Россия
-2	Пулково	Санкт-Петербург	Россия
+1	Пулково	Санкт-Петербург	Россия
+2	Шереметьево	Москва	Россия
 \.
 
 

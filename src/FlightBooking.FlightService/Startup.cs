@@ -2,6 +2,7 @@ using System.Reflection;
 using FlightBooking.FlightService.Database;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.OpenApi.Models;
+using Newtonsoft.Json.Converters;
 
 namespace FlightBooking.FlightService;
 
@@ -18,7 +19,11 @@ public class Startup
     public void ConfigureServices(IServiceCollection services)
     {
         // services.AddHealthChecks();
-        services.AddControllers();
+        services.AddControllers()
+            .AddNewtonsoftJson(options =>
+            {
+                options.SerializerSettings.Converters.Add(new StringEnumConverter());
+            });
         
         services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
         services.AddEndpointsApiExplorer();
