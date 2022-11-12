@@ -18,6 +18,9 @@ public class Startup
     // This method gets called by the runtime. Use this method to add services to the container.
     public void ConfigureServices(IServiceCollection services)
     {
+        services.AddHealthChecks()
+            .AddDbContextCheck<TicketsContext>();
+        
         services.AddControllers()
             .AddNewtonsoftJson(options =>
             {
@@ -55,6 +58,7 @@ public class Startup
         app.UseEndpoints(endpoints =>
         {
             endpoints.MapControllers();
+            endpoints.MapHealthChecks("/manage/health");
         });
     }
 }

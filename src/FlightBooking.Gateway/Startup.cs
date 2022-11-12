@@ -1,15 +1,20 @@
 using System;
 using System.IO;
+using System.Net.Http;
 using System.Reflection;
 using FlightBooking.Gateway.Domain;
 using FlightBooking.Gateway.Repositories;
 using Microsoft.AspNetCore.Builder;
+using Microsoft.AspNetCore.Diagnostics.HealthChecks;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Diagnostics.HealthChecks;
 using Microsoft.Extensions.Hosting;
 using Microsoft.OpenApi.Models;
 using Newtonsoft.Json.Converters;
+using Polly;
+using Polly.Extensions.Http;
 
 namespace FlightBooking.Gateway;
 
@@ -25,7 +30,12 @@ public class Startup
     // This method gets called by the runtime. Use this method to add services to the container.
     public void ConfigureServices(IServiceCollection services)
     {
-        // services.AddHealthChecks();
+        services.AddHealthChecks()
+            .AddCheck("self", () => HealthCheckResult.Healthy())
+            .AddUrlGroup(new Uri(Configuration["FlightsService:Host"]), name: "flights-service-check")
+            .AddUrlGroup(new Uri(Configuration["TicketService:Host"]), name: "ticket-service-check")
+            .AddUrlGroup(new Uri(Configuration["PrivilegeService:Host"]), name: "bonus-service-check", failureStatus: HealthStatus.Degraded);
+        
         services.AddControllers()
             .AddNewtonsoftJson(options =>
             {
@@ -44,14 +54,21 @@ public class Startup
                 c.IncludeXmlComments(xmlPath);
         });
 
+        // register http services
         services.Configure<FlightsSettings>(Configuration.GetSection("FlightsService"));
-        services.AddScoped<IFlightsRepository, FlightsRepository>();
+        services.AddHttpClient<IFlightsRepository, FlightsRepository>()
+            .AddPolicyHandler(GetRetryPolicy())
+            .AddPolicyHandler(GetCircuitBreakerPolicy());
         
         services.Configure<TicketsSettings>(Configuration.GetSection("TicketService"));
-        services.AddScoped<ITicketsRepository, TicketsRepository>();
+        services.AddHttpClient<ITicketsRepository, TicketsRepository>()
+            .AddPolicyHandler(GetRetryPolicy())
+            .AddPolicyHandler(GetCircuitBreakerPolicy());
         
         services.Configure<PrivilegeSettings>(Configuration.GetSection("PrivilegeService"));
-        services.AddScoped<IPrivilegeRepository, PrivilegeRepository>();
+        services.AddHttpClient<IPrivilegeRepository, PrivilegeRepository>()
+            .AddPolicyHandler(GetRetryPolicy())
+            .AddPolicyHandler(GetCircuitBreakerPolicy());
         
         services.AddScoped<ITicketsService, TicketsService>();
     }
@@ -72,6 +89,29 @@ public class Startup
         app.UseEndpoints(endpoints =>
         {
             endpoints.MapControllers();
+            endpoints.MapHealthChecks("/manage/health", new HealthCheckOptions()
+            {
+                Predicate = _ => true
+            });
+            endpoints.MapHealthChecks("/manage/health/liveness", new HealthCheckOptions
+            {
+                Predicate = r => r.Name.Contains("self")
+            });
         });
+    }
+    
+    private static IAsyncPolicy<HttpResponseMessage> GetCircuitBreakerPolicy()
+    {
+        return HttpPolicyExtensions
+            .HandleTransientHttpError()
+            .CircuitBreakerAsync(5, TimeSpan.FromSeconds(30));
+    }
+    
+    private static IAsyncPolicy<HttpResponseMessage> GetRetryPolicy()
+    {
+        return HttpPolicyExtensions
+            .HandleTransientHttpError()
+            .OrResult(msg => msg.StatusCode == System.Net.HttpStatusCode.NotFound)
+            .WaitAndRetryAsync(2, retryAttempt => TimeSpan.FromSeconds(Math.Pow(2, retryAttempt)));
     }
 }

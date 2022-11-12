@@ -1,5 +1,7 @@
 using System;
+using System.Net;
 using System.Net.Http;
+using System.Net.Sockets;
 using System.Threading.Tasks;
 using System.Web;
 using FlightBooking.FlightService.Dto;
@@ -19,9 +21,9 @@ public class FlightsRepository : IFlightsRepository
     private readonly ILogger<FlightsRepository> _logger;
     private readonly HttpClient _client;
 
-    public FlightsRepository(IOptions<FlightsSettings> settings, ILogger<FlightsRepository> logger)
+    public FlightsRepository(IOptions<FlightsSettings> settings, HttpClient httpClient, ILogger<FlightsRepository> logger)
     {
-        _client = new HttpClient();
+        _client = httpClient;
         _client.BaseAddress = settings.Value.Host;
         _logger = logger;
     }

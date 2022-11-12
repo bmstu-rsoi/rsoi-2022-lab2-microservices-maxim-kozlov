@@ -7,7 +7,9 @@ using FlightBooking.BonusService.Dto;
 using FlightBooking.Gateway.Dto.Tickets;
 using FlightBooking.Gateway.Repositories;
 using FlightBooking.TicketService.Dto;
+using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Logging;
+using Polly.CircuitBreaker;
 using TicketPurchaseRequest = FlightBooking.Gateway.Dto.Tickets.TicketPurchaseRequest;
 
 namespace FlightBooking.Gateway.Domain;
@@ -119,9 +121,13 @@ public class TicketsService : ITicketsService
             var flight = await _flightsRepository.GetByNumberAsync(flightNumber);
             _mapper.Map(flight, ticket);
         }
+        catch (BrokenCircuitException ex)
+        {
+            _logger.LogWarning(ex, "Flight service is inoperative, please try later on (BrokenCircuit)");
+        }
         catch (HttpRequestException ex)
         {
-            _logger.LogError(ex, "Error while getting flights info for {flightNumber}", flightNumber);
+            _logger.LogWarning(ex, "Error while getting flights info for {flightNumber}", flightNumber);
         }
 
         return ticket;

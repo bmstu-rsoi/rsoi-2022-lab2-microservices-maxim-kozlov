@@ -20,9 +20,9 @@ public class PrivilegeRepository : IPrivilegeRepository
     private readonly ILogger<PrivilegeRepository> _logger;
     private readonly HttpClient _client;
 
-    public PrivilegeRepository(IOptions<PrivilegeSettings> settings, ILogger<PrivilegeRepository> logger)
+    public PrivilegeRepository(IOptions<PrivilegeSettings> settings, HttpClient httpClient, ILogger<PrivilegeRepository> logger)
     {
-        _client = new HttpClient();
+        _client = httpClient;
         _client.BaseAddress = settings.Value.Host;
         _logger = logger;
     }

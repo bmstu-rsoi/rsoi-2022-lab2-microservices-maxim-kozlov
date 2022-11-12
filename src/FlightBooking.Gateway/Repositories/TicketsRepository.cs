@@ -20,9 +20,9 @@ public class TicketsRepository : ITicketsRepository
     private readonly ILogger<TicketsRepository> _logger;
     private readonly HttpClient _client;
 
-    public TicketsRepository(IOptions<TicketsSettings> settings, ILogger<TicketsRepository> logger)
+    public TicketsRepository(IOptions<TicketsSettings> settings, HttpClient httpClient, ILogger<TicketsRepository> logger)
     {
-        _client = new HttpClient();
+        _client = httpClient;
         _client.BaseAddress = settings.Value.Host;
         _logger = logger;
     }

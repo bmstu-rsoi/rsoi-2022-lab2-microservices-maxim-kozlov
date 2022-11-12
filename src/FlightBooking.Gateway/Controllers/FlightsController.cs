@@ -1,5 +1,7 @@
 using System;
 using System.ComponentModel.DataAnnotations;
+using System.Net;
+using System.Net.Http;
 using System.Net.Mime;
 using System.Threading.Tasks;
 using FlightBooking.FlightService.Dto;
@@ -7,6 +9,7 @@ using FlightBooking.Gateway.Repositories;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
+using Polly.CircuitBreaker;
 using Swashbuckle.AspNetCore.Annotations;
 
 namespace FlightBooking.Gateway.Controllers;
@@ -40,6 +43,21 @@ public class FlightsController : ControllerBase
         {
             var response = await _flightsRepository.GetAllAsync(page, size);
             return Ok(response);
+        }
+        catch (HttpRequestException ex) when ((int?)ex.StatusCode < 500)
+        {
+            var statusCode = ex.StatusCode ?? HttpStatusCode.BadRequest;
+            return StatusCode((int)statusCode, ex.Source);
+        }
+        catch (HttpRequestException ex)
+        {
+            _logger.LogError(ex, "Service is inoperative, please try later on");
+            return StatusCode(StatusCodes.Status503ServiceUnavailable, "flight-service");
+        }
+        catch (BrokenCircuitException ex)
+        {
+            _logger.LogError(ex, "Service is inoperative, please try later on (BrokenCircuit)");
+            return StatusCode(StatusCodes.Status503ServiceUnavailable, "flight-service");
         }
         catch (Exception ex)
         {
